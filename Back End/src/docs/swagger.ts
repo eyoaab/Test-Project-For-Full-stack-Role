@@ -16,6 +16,10 @@ export const swaggerOptions = {
         url: 'http://localhost:3000/api/v1',
         description: 'Development HTTP server',
       },
+      {
+        url: 'https://test-project-for-full-stack-role.onrender.com/api/v1',
+        description: 'Production HTTPS server',
+      },
     ],
     components: {
       securitySchemes: {
