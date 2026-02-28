@@ -60,7 +60,7 @@ export default function DashboardPage() {
     }
   };
 
-  const filteredEntries = entries.filter((entry) => {
+  const filteredEntries = (Array.isArray(entries) ? entries : []).filter((entry) => {
     const matchesSearch =
       entry.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       entry.description.toLowerCase().includes(searchQuery.toLowerCase()) ||

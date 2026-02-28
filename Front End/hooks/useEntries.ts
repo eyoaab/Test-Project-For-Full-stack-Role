@@ -29,11 +29,12 @@ export function useEntries() {
   });
 
   useEffect(() => {
+    const entriesArray = Array.isArray(entries) ? entries : [];
     const newStats = {
-      total: entries.length,
-      pending: entries.filter((e) => e.status === "pending").length,
-      approved: entries.filter((e) => e.status === "approved").length,
-      rejected: entries.filter((e) => e.status === "rejected").length,
+      total: entriesArray.length,
+      pending: entriesArray.filter((e) => e.status === "pending").length,
+      approved: entriesArray.filter((e) => e.status === "approved").length,
+      rejected: entriesArray.filter((e) => e.status === "rejected").length,
     };
     setStats(newStats);
   }, [entries]);
@@ -52,10 +53,13 @@ export function useEntries() {
         data = await entriesApi.getMyEntries(token);
       }
 
-      setEntries(data);
+      // Ensure data is always an array
+      const entriesData = Array.isArray(data) ? data : [];
+      setEntries(entriesData);
     } catch (err) {
       const errorMessage = handleApiError(err);
       setError(errorMessage);
+      setEntries([]); // Reset to empty array on error
       toast.error(errorMessage);
     } finally {
       setLoading(false);

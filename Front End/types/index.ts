@@ -2,7 +2,8 @@
 export type UserRole = "user" | "manager";
 
 export interface User {
-  _id: string;
+  _id?: string;  // MongoDB ID (entries API)
+  id?: string;   // Auth API returns 'id' instead of '_id'
   email: string;
   role: UserRole;
   createdAt?: string;

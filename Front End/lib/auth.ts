@@ -23,7 +23,7 @@ export const authOptions: NextAuthOptions = {
 
           if (response.token && response.user) {
             return {
-              id: response.user._id,
+              id: (response.user as any).id || response.user._id,
               email: response.user.email,
               role: response.user.role,
               token: response.token,
@@ -32,7 +32,9 @@ export const authOptions: NextAuthOptions = {
 
           return null;
         } catch (error: any) {
-          throw new Error(error.response?.data?.message || "Invalid credentials");
+          // Backend error message is already in error.message from our API handler
+          const errorMessage = error.message || error.response?.data?.message || "Invalid credentials";
+          throw new Error(errorMessage);
         }
       },
     }),
