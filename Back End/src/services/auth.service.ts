@@ -1,4 +1,4 @@
-import { User, IUser } from '../models/User';
+import { User } from '../models/User';
 import { generateToken } from '../utils/jwt';
 import { ApiError } from '../utils/ApiError';
 

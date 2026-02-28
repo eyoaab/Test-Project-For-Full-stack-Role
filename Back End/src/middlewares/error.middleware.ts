@@ -4,9 +4,9 @@ import { env } from '../config/env';
 
 export const errorHandler = (
   err: Error | ApiError,
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): void => {
   if (err instanceof ApiError) {
     res.status(err.statusCode).json({
@@ -31,7 +31,7 @@ export const errorHandler = (
 
 export const notFoundHandler = (
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ): void => {
   next(ApiError.notFound(`Route ${req.originalUrl} not found`));

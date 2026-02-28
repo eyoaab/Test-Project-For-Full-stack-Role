@@ -1,4 +1,4 @@
-import express, { Application, Request, Response } from 'express';
+import express, { Application, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import swaggerUi from 'swagger-ui-express';
@@ -25,7 +25,7 @@ app.use(generalLimiter);
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-app.get('/health', (req: Request, res: Response) => {
+app.get('/health', ( res: Response) => {
   res.status(200).json({
     success: true,
     message: 'Server is running',

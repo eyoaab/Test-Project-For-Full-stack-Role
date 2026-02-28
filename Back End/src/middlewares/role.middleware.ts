@@ -3,7 +3,7 @@ import { AuthRequest } from './auth.middleware';
 import { ApiError } from '../utils/ApiError';
 
 export const authorize = (...allowedRoles: string[]) => {
-  return (req: AuthRequest, res: Response, next: NextFunction): void => {
+  return (req: AuthRequest, _res: Response, next: NextFunction): void => {
     if (!req.user) {
       next(ApiError.unauthorized('Authentication required'));
       return;
