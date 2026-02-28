@@ -4,13 +4,29 @@ import { authService } from '../services/auth.service';
 class AuthController {
   async register(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { email, password, role } = req.body;
+      const { email, password } = req.body;
 
-      const result = await authService.register({ email, password, role });
+      const result = await authService.register({ email, password, role: 'user' });
 
       res.status(201).json({
         success: true,
         message: 'User registered successfully',
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async registerManager(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { email, password } = req.body;
+
+      const result = await authService.register({ email, password, role: 'manager' });
+
+      res.status(201).json({
+        success: true,
+        message: 'Manager registered successfully',
         data: result,
       });
     } catch (error) {

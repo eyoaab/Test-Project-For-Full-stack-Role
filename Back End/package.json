@@ -7,6 +7,7 @@
     "dev": "nodemon --exec ts-node src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
+    "seed:manager": "ts-node src/scripts/createFirstManager.ts",
     "lint": "eslint . --ext .ts",
     "test": "jest"
   },

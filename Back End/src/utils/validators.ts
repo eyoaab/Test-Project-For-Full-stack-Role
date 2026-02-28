@@ -36,10 +36,17 @@ export const registerValidation = [
   body('password')
     .isLength({ min: 6 })
     .withMessage('Password must be at least 6 characters'),
-  body('role')
-    .optional()
-    .isIn(['user', 'manager'])
-    .withMessage('Role must be either user or manager'),
+  validateRequest,
+];
+
+export const registerManagerValidation = [
+  body('email')
+    .isEmail()
+    .withMessage('Please provide a valid email address')
+    .normalizeEmail(),
+  body('password')
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least 6 characters'),
   validateRequest,
 ];
 
