@@ -1,239 +1,166 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useEntries } from "@/hooks/useEntries";
-import { EntryTable } from "@/components/entries/entry-table";
-import { EntryCard } from "@/components/entries/entry-card";
-import { CreateEntryDialog } from "@/components/entries/create-entry-dialog";
 import { StatsCard } from "@/components/entries/stats-card";
-import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { FileText, CheckCircle, XCircle, Clock, Search, LayoutGrid, List, Loader2 } from "lucide-react";
-import { EntryStatus } from "@/types";
-import { CreateEntryFormData } from "@/lib/validations";
-import { toast } from "sonner";
+import { FileText, CheckCircle, XCircle, Clock, TrendingUp, ArrowRight } from "lucide-react";
 
 export default function DashboardPage() {
-  const { isManager } = useAuth();
-  const { entries, stats, isLoading, fetchEntries, createEntry, updateStatus, deleteEntry, applyFilters } = useEntries();
-  const [viewMode, setViewMode] = useState<"grid" | "table">("table");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<EntryStatus | "all">("all");
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [entryToDelete, setEntryToDelete] = useState<string | null>(null);
+  const router = useRouter();
+  const { isManager, user } = useAuth();
+  const { stats, fetchEntries } = useEntries();
 
   useEffect(() => {
     fetchEntries();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleCreateEntry = async (data: CreateEntryFormData) => {
-    await createEntry(data);
-    fetchEntries();
-  };
-
-  const handleApprove = async (id: string) => {
-    try {
-      await updateStatus(id, { status: "approved" });
-    } catch (error) {
-    }
-  };
-
-  const handleReject = async (id: string) => {
-    try {
-      await updateStatus(id, { status: "rejected" });
-    } catch (error) {
-    }
-  };
-
-  const handleDelete = (id: string) => {
-    setEntryToDelete(id);
-    setDeleteDialogOpen(true);
-  };
-
-  const confirmDelete = async () => {
-    if (!entryToDelete) return;
-    try {
-      await deleteEntry(entryToDelete);
-      setDeleteDialogOpen(false);
-      setEntryToDelete(null);
-    } catch (error) {
-      // Error is already handled in deleteEntry
-    }
-  };
-
-  const filteredEntries = (Array.isArray(entries) ? entries : []).filter((entry) => {
-    const matchesSearch =
-      entry.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      entry.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (isManager && entry.createdBy.email.toLowerCase().includes(searchQuery.toLowerCase()));
-
-    const matchesStatus = statusFilter === "all" || entry.status === statusFilter;
-
-    return matchesSearch && matchesStatus;
-  });
-
   return (
     <div className="space-y-8">
-      {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">
-            {isManager ? "📊 All Entries" : "📝 My Entries"}
-          </h1>
-          <p className="text-gray-600 text-base">
-            {isManager
-              ? "Manage and approve entries from all users"
-              : "Create and manage your entries efficiently"}
-          </p>
+      {/* Welcome Section */}
+      <div className="bg-gradient-to-br from-purple-600 to-purple-800 rounded-3xl shadow-elegant p-8 text-white">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          <div className="space-y-2">
+            <h1 className="text-3xl md:text-4xl font-bold">
+              Welcome back, {user?.email?.split('@')[0]}! 👋
+            </h1>
+            <p className="text-purple-100 text-lg">
+              {isManager 
+                ? "Monitor and manage all entries from your team" 
+                : "Track your entries and their approval status"}
+            </p>
+          </div>
+          <Button 
+            onClick={() => router.push('/dashboard/entries')}
+            className="bg-white text-purple-700 hover:bg-purple-50 font-semibold px-6 h-12 shadow-lg"
+          >
+            View All Entries
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
         </div>
-        {!isManager && <CreateEntryDialog onSubmit={handleCreateEntry} />}
       </div>
 
       {/* Stats Section */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <StatsCard
-          title="Total Entries"
-          value={stats.total}
-          icon={FileText}
-          gradient="from-blue-500 to-blue-700"
-          description="All entries"
-        />
-        <StatsCard
-          title="Pending"
-          value={stats.pending}
-          icon={Clock}
-          gradient="from-amber-500 to-orange-600"
-          description="Awaiting review"
-        />
-        <StatsCard
-          title="Approved"
-          value={stats.approved}
-          icon={CheckCircle}
-          gradient="from-emerald-500 to-green-700"
-          description="Accepted"
-        />
-        <StatsCard
-          title="Rejected"
-          value={stats.rejected}
-          icon={XCircle}
-          gradient="from-red-500 to-rose-700"
-          description="Declined"
-        />
-      </div>
-
-      {/* Search and Filters Section */}
-      <div className="bg-white rounded-2xl shadow-smooth p-6 border border-purple-50">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-purple-400" />
-            <Input
-              placeholder={isManager ? "Search by title, description, or user email..." : "Search entries..."}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-12 h-12 border-purple-100 focus:border-purple-300 rounded-xl"
-            />
-          </div>
-          <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as EntryStatus | "all")}>
-            <SelectTrigger className="w-full sm:w-[200px] h-12 border-purple-100 rounded-xl">
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">✨ All Status</SelectItem>
-              <SelectItem value="pending">⏳ Pending</SelectItem>
-              <SelectItem value="approved">✅ Approved</SelectItem>
-              <SelectItem value="rejected">❌ Rejected</SelectItem>
-            </SelectContent>
-          </Select>
-          <div className="flex gap-2">
-            <Button
-              variant={viewMode === "table" ? "default" : "outline"}
-              size="icon"
-              onClick={() => setViewMode("table")}
-              className={viewMode === "table" ? "gradient-primary text-white h-12 w-12" : "h-12 w-12 border-purple-100 hover:bg-purple-50"}
-            >
-              <List className="h-5 w-5" />
-            </Button>
-            <Button
-              variant={viewMode === "grid" ? "default" : "outline"}
-              size="icon"
-              onClick={() => setViewMode("grid")}
-              className={viewMode === "grid" ? "gradient-primary text-white h-12 w-12" : "h-12 w-12 border-purple-100 hover:bg-purple-50"}
-            >
-              <LayoutGrid className="h-5 w-5" />
-            </Button>
-          </div>
+      <div>
+        <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+          <TrendingUp className="h-6 w-6 text-purple-600" />
+          Overview Statistics
+        </h2>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <StatsCard
+            title="Total Entries"
+            value={stats.total}
+            icon={FileText}
+            gradient="from-blue-500 to-blue-700"
+            description="All entries"
+          />
+          <StatsCard
+            title="Pending"
+            value={stats.pending}
+            icon={Clock}
+            gradient="from-amber-500 to-orange-600"
+            description="Awaiting review"
+          />
+          <StatsCard
+            title="Approved"
+            value={stats.approved}
+            icon={CheckCircle}
+            gradient="from-emerald-500 to-green-700"
+            description="Accepted"
+          />
+          <StatsCard
+            title="Rejected"
+            value={stats.rejected}
+            icon={XCircle}
+            gradient="from-red-500 to-rose-700"
+            description="Declined"
+          />
         </div>
       </div>
 
-      {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      ) : viewMode === "table" ? (
-        <EntryTable
-          entries={filteredEntries}
-          onDelete={handleDelete}
-          onApprove={handleApprove}
-          onReject={handleReject}
-        />
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredEntries.length === 0 ? (
-            <div className="col-span-full text-center py-12">
-              <p className="text-muted-foreground">No entries found</p>
-            </div>
-          ) : (
-            filteredEntries.map((entry) => (
-              <EntryCard
-                key={entry._id}
-                entry={entry}
-                onDelete={handleDelete}
-                onApprove={handleApprove}
-                onReject={handleReject}
-              />
-            ))
+      {/* Quick Actions */}
+      <div>
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">Quick Actions</h2>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <Card 
+            className="shadow-smooth border-0 hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 cursor-pointer" 
+            onClick={() => router.push('/dashboard/entries')}
+          >
+            <CardHeader>
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center mb-2">
+                <FileText className="h-6 w-6 text-white" />
+              </div>
+              <CardTitle className="text-xl">
+                {isManager ? "All Entries" : "My Entries"}
+              </CardTitle>
+              <CardDescription className="text-base">
+                {isManager ? "View and manage all entries" : "View and manage your entries"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button variant="ghost" className="w-full justify-between group">
+                Go to Entries
+                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </CardContent>
+          </Card>
+
+          {isManager && (
+            <Card 
+              className="shadow-smooth border-0 hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 cursor-pointer" 
+              onClick={() => router.push('/dashboard/create-manager')}
+            >
+              <CardHeader>
+                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center mb-2">
+                  <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                  </svg>
+                </div>
+                <CardTitle className="text-xl">Create Manager</CardTitle>
+                <CardDescription className="text-base">
+                  Add a new manager account
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button variant="ghost" className="w-full justify-between group">
+                  Create Manager
+                  <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </CardContent>
+            </Card>
           )}
-        </div>
-      )}
 
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Entry</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this entry? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDelete}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+          <Card className="shadow-smooth border-0 bg-gradient-to-br from-purple-50 to-blue-50">
+            <CardHeader>
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center mb-2">
+                <TrendingUp className="h-6 w-6 text-white" />
+              </div>
+              <CardTitle className="text-xl">Activity</CardTitle>
+              <CardDescription className="text-base">
+                {isManager ? "System-wide activity" : "Your recent activity"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">Approval Rate</span>
+                  <span className="font-bold text-green-600">
+                    {stats.total > 0 ? Math.round((stats.approved / stats.total) * 100) : 0}%
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">Pending Items</span>
+                  <span className="font-bold text-amber-600">{stats.pending}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

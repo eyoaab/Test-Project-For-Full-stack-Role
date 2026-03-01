@@ -22,7 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { LogOut, User, Settings, Menu } from "lucide-react";
+import { LogOut, User, Menu } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface NavbarProps {
@@ -54,9 +54,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
         </Button>
 
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl gradient-primary flex items-center justify-center shadow-md">
-            <span className="text-white font-bold text-lg">E</span>
-          </div>
+         
           <div className="hidden sm:block">
             <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">
               Entry Manager
@@ -74,7 +72,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
                 <div className="hidden md:flex flex-col items-start">
                   <span className="text-sm font-semibold text-gray-700">{user?.email}</span>
                   <span className={`text-xs font-medium ${isManager ? 'text-purple-600' : 'text-gray-500'}`}>
-                    {user?.role === 'manager' ? '👑 Manager' : '👤 User'}
+                    {user?.role === 'manager' ? 'Manager' : 'User'}
                   </span>
                 </div>
               </Button>
@@ -88,16 +86,11 @@ export function Navbar({ onMenuClick }: NavbarProps) {
                   <div className="flex flex-col">
                     <p className="text-sm font-semibold">{user?.email}</p>
                     <p className="text-xs text-muted-foreground capitalize">
-                      {user?.role === 'manager' ? '👑 Manager Account' : '👤 User Account'}
+                      {user?.role === 'manager' ? 'Manager Account' : 'User Account'}
                     </p>
                   </div>
                 </div>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="cursor-pointer hover:bg-purple-50 transition-colors">
-                <Settings className="mr-3 h-4 w-4 text-purple-600" />
-                <span className="font-medium">Settings</span>
-              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="cursor-pointer text-red-600 hover:bg-red-50 transition-colors"
