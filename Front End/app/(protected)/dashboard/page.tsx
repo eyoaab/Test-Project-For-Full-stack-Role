@@ -92,84 +92,95 @@ export default function DashboardPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            {isManager ? "All Entries" : "My Entries"}
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">
+            {isManager ? "📊 All Entries" : "📝 My Entries"}
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-gray-600 text-base">
             {isManager
               ? "Manage and approve entries from all users"
-              : "Create and manage your entries"}
+              : "Create and manage your entries efficiently"}
           </p>
         </div>
         {!isManager && <CreateEntryDialog onSubmit={handleCreateEntry} />}
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* Stats Section */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="Total Entries"
           value={stats.total}
           icon={FileText}
-          color="bg-blue-600"
+          gradient="from-blue-500 to-blue-700"
+          description="All entries"
         />
         <StatsCard
           title="Pending"
           value={stats.pending}
           icon={Clock}
-          color="bg-yellow-600"
+          gradient="from-amber-500 to-orange-600"
+          description="Awaiting review"
         />
         <StatsCard
           title="Approved"
           value={stats.approved}
           icon={CheckCircle}
-          color="bg-green-600"
+          gradient="from-emerald-500 to-green-700"
+          description="Accepted"
         />
         <StatsCard
           title="Rejected"
           value={stats.rejected}
           icon={XCircle}
-          color="bg-red-600"
+          gradient="from-red-500 to-rose-700"
+          description="Declined"
         />
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder={isManager ? "Search by title, description, or user email..." : "Search entries..."}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as EntryStatus | "all")}>
-          <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="approved">Approved</SelectItem>
-            <SelectItem value="rejected">Rejected</SelectItem>
-          </SelectContent>
-        </Select>
-        <div className="flex gap-2">
-          <Button
-            variant={viewMode === "table" ? "default" : "outline"}
-            size="icon"
-            onClick={() => setViewMode("table")}
-          >
-            <List className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={viewMode === "grid" ? "default" : "outline"}
-            size="icon"
-            onClick={() => setViewMode("grid")}
-          >
-            <LayoutGrid className="h-4 w-4" />
-          </Button>
+      {/* Search and Filters Section */}
+      <div className="bg-white rounded-2xl shadow-smooth p-6 border border-purple-50">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-purple-400" />
+            <Input
+              placeholder={isManager ? "Search by title, description, or user email..." : "Search entries..."}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-12 h-12 border-purple-100 focus:border-purple-300 rounded-xl"
+            />
+          </div>
+          <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as EntryStatus | "all")}>
+            <SelectTrigger className="w-full sm:w-[200px] h-12 border-purple-100 rounded-xl">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">✨ All Status</SelectItem>
+              <SelectItem value="pending">⏳ Pending</SelectItem>
+              <SelectItem value="approved">✅ Approved</SelectItem>
+              <SelectItem value="rejected">❌ Rejected</SelectItem>
+            </SelectContent>
+          </Select>
+          <div className="flex gap-2">
+            <Button
+              variant={viewMode === "table" ? "default" : "outline"}
+              size="icon"
+              onClick={() => setViewMode("table")}
+              className={viewMode === "table" ? "gradient-primary text-white h-12 w-12" : "h-12 w-12 border-purple-100 hover:bg-purple-50"}
+            >
+              <List className="h-5 w-5" />
+            </Button>
+            <Button
+              variant={viewMode === "grid" ? "default" : "outline"}
+              size="icon"
+              onClick={() => setViewMode("grid")}
+              className={viewMode === "grid" ? "gradient-primary text-white h-12 w-12" : "h-12 w-12 border-purple-100 hover:bg-purple-50"}
+            >
+              <LayoutGrid className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </div>
 
