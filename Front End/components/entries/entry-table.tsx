@@ -12,9 +12,10 @@ interface EntryTableProps {
   onDelete?: (id: string) => void;
   onApprove?: (id: string) => void;
   onReject?: (id: string) => void;
+  onRowClick?: (entry: Entry) => void;
 }
 
-export function EntryTable({ entries, onDelete, onApprove, onReject }: EntryTableProps) {
+export function EntryTable({ entries, onDelete, onApprove, onReject, onRowClick }: EntryTableProps) {
   const { isManager } = useAuth();
 
   if (entries.length === 0) {
@@ -44,15 +45,19 @@ export function EntryTable({ entries, onDelete, onApprove, onReject }: EntryTabl
             {entries.map((entry) => {
               const variant = getStatusBadgeVariant(entry.status);
               return (
-                <tr key={entry._id} className="hover:bg-muted/50 transition-colors">
+                <tr 
+                  key={entry._id} 
+                  className="hover:bg-purple-50/50 transition-colors cursor-pointer"
+                  onClick={() => onRowClick?.(entry)}
+                >
                   <td className="p-4">
-                    <div className="font-medium">{entry.title}</div>
-                    <div className="text-sm text-muted-foreground md:hidden">
-                      {entry.description.substring(0, 30)}...
+                    <div className="font-medium text-gray-800 truncate max-w-[200px]">{entry.title}</div>
+                    <div className="text-sm text-gray-500 md:hidden truncate max-w-[200px]">
+                      {entry.description}
                     </div>
                   </td>
                   <td className="p-4 hidden md:table-cell">
-                    <div className="max-w-xs truncate text-sm text-muted-foreground">
+                    <div className="max-w-xs truncate text-sm text-gray-600">
                       {entry.description}
                     </div>
                   </td>
@@ -82,7 +87,10 @@ export function EntryTable({ entries, onDelete, onApprove, onReject }: EntryTabl
                             size="sm"
                             variant="ghost"
                             className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                            onClick={() => onApprove?.(entry._id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onApprove?.(entry._id);
+                            }}
                           >
                             <CheckCircle className="h-4 w-4" />
                           </Button>
@@ -90,7 +98,10 @@ export function EntryTable({ entries, onDelete, onApprove, onReject }: EntryTabl
                             size="sm"
                             variant="ghost"
                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            onClick={() => onReject?.(entry._id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onReject?.(entry._id);
+                            }}
                           >
                             <XCircle className="h-4 w-4" />
                           </Button>
@@ -100,7 +111,10 @@ export function EntryTable({ entries, onDelete, onApprove, onReject }: EntryTabl
                           size="sm"
                           variant="ghost"
                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          onClick={() => onDelete?.(entry._id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDelete?.(entry._id);
+                          }}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

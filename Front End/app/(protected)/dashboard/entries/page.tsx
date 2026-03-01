@@ -6,6 +6,7 @@ import { useEntries } from "@/hooks/useEntries";
 import { EntryTable } from "@/components/entries/entry-table";
 import { EntryCard } from "@/components/entries/entry-card";
 import { CreateEntryDialog } from "@/components/entries/create-entry-dialog";
+import { EntryDetailsDialog } from "@/components/entries/entry-details-dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,7 +27,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Search, LayoutGrid, List, Loader2 } from "lucide-react";
-import { EntryStatus } from "@/types";
+import { Entry, EntryStatus } from "@/types";
 import { CreateEntryFormData } from "@/lib/validations";
 
 export default function EntriesPage() {
@@ -37,6 +38,8 @@ export default function EntriesPage() {
   const [statusFilter, setStatusFilter] = useState<EntryStatus | "all">("all");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState<string | null>(null);
+  const [selectedEntry, setSelectedEntry] = useState<Entry | null>(null);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchEntries();
@@ -75,6 +78,11 @@ export default function EntriesPage() {
       setEntryToDelete(null);
     } catch (error) {
     }
+  };
+
+  const handleEntryClick = (entry: Entry) => {
+    setSelectedEntry(entry);
+    setDetailsDialogOpen(true);
   };
 
   const filteredEntries = (Array.isArray(entries) ? entries : []).filter((entry) => {
@@ -160,6 +168,7 @@ export default function EntriesPage() {
           onDelete={handleDelete}
           onApprove={handleApprove}
           onReject={handleReject}
+          onRowClick={handleEntryClick}
         />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -175,11 +184,21 @@ export default function EntriesPage() {
                 onDelete={handleDelete}
                 onApprove={handleApprove}
                 onReject={handleReject}
+                onClick={handleEntryClick}
               />
             ))
           )}
         </div>
       )}
+
+      <EntryDetailsDialog
+        entry={selectedEntry}
+        open={detailsDialogOpen}
+        onOpenChange={setDetailsDialogOpen}
+        onDelete={handleDelete}
+        onApprove={handleApprove}
+        onReject={handleReject}
+      />
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>

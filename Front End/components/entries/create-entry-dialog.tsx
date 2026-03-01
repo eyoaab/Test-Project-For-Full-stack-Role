@@ -60,7 +60,7 @@ export function CreateEntryDialog({ onSubmit }: CreateEntryDialogProps) {
         <form onSubmit={handleSubmit(handleFormSubmit)}>
           <DialogHeader className="pb-4">
             <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">
-              ✨ Create New Entry
+              Create New Entry
             </DialogTitle>
             <DialogDescription className="text-base text-gray-600">
               Fill in the details below. Your entry will be submitted for approval.

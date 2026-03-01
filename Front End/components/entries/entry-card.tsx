@@ -13,14 +13,15 @@ interface EntryCardProps {
   onDelete?: (id: string) => void;
   onApprove?: (id: string) => void;
   onReject?: (id: string) => void;
+  onClick?: (entry: Entry) => void;
 }
 
-export function EntryCard({ entry, onDelete, onApprove, onReject }: EntryCardProps) {
+export function EntryCard({ entry, onDelete, onApprove, onReject, onClick }: EntryCardProps) {
   const { isManager } = useAuth();
   const variant = getStatusBadgeVariant(entry.status);
 
   return (
-    <Card className="hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 border-0 shadow-smooth bg-white overflow-hidden">
+    <Card className="hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 border-0 shadow-smooth bg-white overflow-hidden cursor-pointer" onClick={() => onClick?.(entry)}>
       <div className={`h-1.5 ${
         entry.status === 'pending' ? 'bg-gradient-to-r from-amber-400 to-orange-500' :
         entry.status === 'approved' ? 'bg-gradient-to-r from-emerald-400 to-green-600' :
@@ -28,13 +29,13 @@ export function EntryCard({ entry, onDelete, onApprove, onReject }: EntryCardPro
       }`} />
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between gap-3">
-          <div className="space-y-2 flex-1">
-            <h3 className="font-bold text-lg leading-tight text-gray-800">{entry.title}</h3>
+          <div className="space-y-2 flex-1 min-w-0">
+            <h3 className="font-bold text-lg leading-tight text-gray-800 truncate">{entry.title}</h3>
             <div className="flex items-center gap-2 text-xs text-gray-500">
-              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              <span className="font-medium">{formatDate(entry.createdAt)}</span>
+              <span className="font-medium truncate">{formatDate(entry.createdAt)}</span>
             </div>
           </div>
           <Badge variant={variant} className="shrink-0 px-3 py-1 text-xs font-semibold">
@@ -43,7 +44,7 @@ export function EntryCard({ entry, onDelete, onApprove, onReject }: EntryCardPro
         </div>
       </CardHeader>
       <CardContent className="pb-4">
-        <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">{entry.description}</p>
+        <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">{entry.description}</p>
         <div className="mt-5 flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-xs text-gray-500 font-medium">Amount</p>
@@ -72,7 +73,10 @@ export function EntryCard({ entry, onDelete, onApprove, onReject }: EntryCardPro
             <Button
               size="sm"
               className="flex-1 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white shadow-sm"
-              onClick={() => onApprove?.(entry._id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onApprove?.(entry._id);
+              }}
             >
               <CheckCircle className="mr-2 h-4 w-4" />
               Approve
@@ -80,7 +84,10 @@ export function EntryCard({ entry, onDelete, onApprove, onReject }: EntryCardPro
             <Button
               size="sm"
               className="flex-1 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-sm"
-              onClick={() => onReject?.(entry._id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onReject?.(entry._id);
+              }}
             >
               <XCircle className="mr-2 h-4 w-4" />
               Reject
@@ -91,7 +98,10 @@ export function EntryCard({ entry, onDelete, onApprove, onReject }: EntryCardPro
             size="sm"
             variant="outline"
             className="ml-auto border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
-            onClick={() => onDelete?.(entry._id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete?.(entry._id);
+            }}
           >
             <Trash2 className="mr-2 h-4 w-4" />
             Delete
