@@ -1,5 +1,6 @@
 "use client";
 
+import { memo, useCallback } from "react";
 import { Entry } from "@/types";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,12 +17,31 @@ interface EntryCardProps {
   onClick?: (entry: Entry) => void;
 }
 
-export function EntryCard({ entry, onDelete, onApprove, onReject, onClick }: EntryCardProps) {
+function EntryCardComponent({ entry, onDelete, onApprove, onReject, onClick }: EntryCardProps) {
   const { isManager } = useAuth();
   const variant = getStatusBadgeVariant(entry.status);
 
+  const handleClick = useCallback(() => {
+    onClick?.(entry);
+  }, [onClick, entry]);
+
+  const handleDelete = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete?.(entry._id);
+  }, [onDelete, entry._id]);
+
+  const handleApprove = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onApprove?.(entry._id);
+  }, [onApprove, entry._id]);
+
+  const handleReject = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onReject?.(entry._id);
+  }, [onReject, entry._id]);
+
   return (
-    <Card className="hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 border-0 shadow-smooth bg-white overflow-hidden cursor-pointer" onClick={() => onClick?.(entry)}>
+    <Card className="hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 border-0 shadow-smooth bg-white overflow-hidden cursor-pointer" onClick={handleClick}>
       <div className={`h-1.5 ${
         entry.status === 'pending' ? 'bg-gradient-to-r from-amber-400 to-orange-500' :
         entry.status === 'approved' ? 'bg-gradient-to-r from-emerald-400 to-green-600' :
@@ -73,10 +93,7 @@ export function EntryCard({ entry, onDelete, onApprove, onReject, onClick }: Ent
             <Button
               size="sm"
               className="flex-1 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white shadow-sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onApprove?.(entry._id);
-              }}
+              onClick={handleApprove}
             >
               <CheckCircle className="mr-2 h-4 w-4" />
               Approve
@@ -84,10 +101,7 @@ export function EntryCard({ entry, onDelete, onApprove, onReject, onClick }: Ent
             <Button
               size="sm"
               className="flex-1 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onReject?.(entry._id);
-              }}
+              onClick={handleReject}
             >
               <XCircle className="mr-2 h-4 w-4" />
               Reject
@@ -98,10 +112,7 @@ export function EntryCard({ entry, onDelete, onApprove, onReject, onClick }: Ent
             size="sm"
             variant="outline"
             className="ml-auto border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete?.(entry._id);
-            }}
+            onClick={handleDelete}
           >
             <Trash2 className="mr-2 h-4 w-4" />
             Delete
@@ -111,3 +122,5 @@ export function EntryCard({ entry, onDelete, onApprove, onReject, onClick }: Ent
     </Card>
   );
 }
+
+export const EntryCard = memo(EntryCardComponent);

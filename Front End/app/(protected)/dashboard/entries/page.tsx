@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useEntries } from "@/hooks/useEntries";
 import { EntryTable } from "@/components/entries/entry-table";
@@ -35,6 +35,7 @@ export default function EntriesPage() {
   const { entries, isLoading, fetchEntries, createEntry, updateStatus, deleteEntry } = useEntries();
   const [viewMode, setViewMode] = useState<"grid" | "table">("table");
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<EntryStatus | "all">("all");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState<string | null>(null);
@@ -42,35 +43,43 @@ export default function EntriesPage() {
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  useEffect(() => {
     fetchEntries();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleCreateEntry = async (data: CreateEntryFormData) => {
+  const handleCreateEntry = useCallback(async (data: CreateEntryFormData) => {
     await createEntry(data);
     fetchEntries();
-  };
+  }, [createEntry, fetchEntries]);
 
-  const handleApprove = async (id: string) => {
+  const handleApprove = useCallback(async (id: string) => {
     try {
       await updateStatus(id, { status: "approved" });
     } catch (error) {
     }
-  };
+  }, [updateStatus]);
 
-  const handleReject = async (id: string) => {
+  const handleReject = useCallback(async (id: string) => {
     try {
       await updateStatus(id, { status: "rejected" });
     } catch (error) {
     }
-  };
+  }, [updateStatus]);
 
-  const handleDelete = (id: string) => {
+  const handleDelete = useCallback((id: string) => {
     setEntryToDelete(id);
     setDeleteDialogOpen(true);
-  };
+  }, []);
 
-  const confirmDelete = async () => {
+  const confirmDelete = useCallback(async () => {
     if (!entryToDelete) return;
     try {
       await deleteEntry(entryToDelete);
@@ -78,23 +87,28 @@ export default function EntriesPage() {
       setEntryToDelete(null);
     } catch (error) {
     }
-  };
+  }, [entryToDelete, deleteEntry]);
 
-  const handleEntryClick = (entry: Entry) => {
+  const handleEntryClick = useCallback((entry: Entry) => {
     setSelectedEntry(entry);
     setDetailsDialogOpen(true);
-  };
+  }, []);
 
-  const filteredEntries = (Array.isArray(entries) ? entries : []).filter((entry) => {
-    const matchesSearch =
-      entry.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      entry.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (isManager && entry.createdBy.email.toLowerCase().includes(searchQuery.toLowerCase()));
+  const filteredEntries = useMemo(() => {
+    const entriesArray = Array.isArray(entries) ? entries : [];
+    const searchLower = debouncedSearch.toLowerCase();
+    
+    return entriesArray.filter((entry) => {
+      const matchesSearch =
+        entry.title.toLowerCase().includes(searchLower) ||
+        entry.description.toLowerCase().includes(searchLower) ||
+        (isManager && entry.createdBy.email.toLowerCase().includes(searchLower));
 
-    const matchesStatus = statusFilter === "all" || entry.status === statusFilter;
+      const matchesStatus = statusFilter === "all" || entry.status === statusFilter;
 
-    return matchesSearch && matchesStatus;
-  });
+      return matchesSearch && matchesStatus;
+    });
+  }, [entries, debouncedSearch, statusFilter, isManager]);
 
   return (
     <div className="space-y-8">

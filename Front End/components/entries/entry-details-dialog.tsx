@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { Entry } from "@/types";
 import {
   Dialog,
@@ -23,7 +24,7 @@ interface EntryDetailsDialogProps {
   onReject?: (id: string) => void;
 }
 
-export function EntryDetailsDialog({
+function EntryDetailsDialogComponent({
   entry,
   open,
   onOpenChange,
@@ -159,3 +160,5 @@ export function EntryDetailsDialog({
     </Dialog>
   );
 }
+
+export const EntryDetailsDialog = memo(EntryDetailsDialogComponent);

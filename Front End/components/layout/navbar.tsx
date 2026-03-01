@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo, useCallback } from "react";
 import { signOut } from "next-auth/react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -29,17 +29,17 @@ interface NavbarProps {
   onMenuClick?: () => void;
 }
 
-export function Navbar({ onMenuClick }: NavbarProps) {
+function NavbarComponent({ onMenuClick }: NavbarProps) {
   const { user, isManager } = useAuth();
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
 
-  const handleLogoutClick = () => {
+  const handleLogoutClick = useCallback(() => {
     setLogoutDialogOpen(true);
-  };
+  }, []);
 
-  const confirmLogout = () => {
+  const confirmLogout = useCallback(() => {
     signOut({ callbackUrl: "/login" });
-  };
+  }, []);
 
   return (
     <nav className="border-b border-purple-100 bg-white/80 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 sticky top-0 z-40 shadow-sm">
@@ -123,3 +123,5 @@ export function Navbar({ onMenuClick }: NavbarProps) {
     </nav>
   );
 }
+
+export const Navbar = memo(NavbarComponent);

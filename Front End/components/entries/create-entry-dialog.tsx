@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createEntrySchema, type CreateEntryFormData } from "@/lib/validations";
@@ -23,7 +23,7 @@ interface CreateEntryDialogProps {
   onSubmit: (data: CreateEntryFormData) => Promise<void>;
 }
 
-export function CreateEntryDialog({ onSubmit }: CreateEntryDialogProps) {
+function CreateEntryDialogComponent({ onSubmit }: CreateEntryDialogProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -150,3 +150,5 @@ export function CreateEntryDialog({ onSubmit }: CreateEntryDialogProps) {
     </Dialog>
   );
 }
+
+export const CreateEntryDialog = memo(CreateEntryDialogComponent);

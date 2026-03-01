@@ -1,5 +1,6 @@
 "use client";
 
+import { memo, useCallback } from "react";
 import { Entry } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,7 +16,116 @@ interface EntryTableProps {
   onRowClick?: (entry: Entry) => void;
 }
 
-export function EntryTable({ entries, onDelete, onApprove, onReject, onRowClick }: EntryTableProps) {
+const EntryRow = memo(({ 
+  entry, 
+  isManager, 
+  onDelete, 
+  onApprove, 
+  onReject, 
+  onRowClick 
+}: { 
+  entry: Entry; 
+  isManager: boolean;
+  onDelete?: (id: string) => void;
+  onApprove?: (id: string) => void;
+  onReject?: (id: string) => void;
+  onRowClick?: (entry: Entry) => void;
+}) => {
+  const variant = getStatusBadgeVariant(entry.status);
+
+  const handleRowClick = useCallback(() => {
+    onRowClick?.(entry);
+  }, [onRowClick, entry]);
+
+  const handleDelete = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete?.(entry._id);
+  }, [onDelete, entry._id]);
+
+  const handleApprove = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onApprove?.(entry._id);
+  }, [onApprove, entry._id]);
+
+  const handleReject = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onReject?.(entry._id);
+  }, [onReject, entry._id]);
+
+  return (
+    <tr 
+      className="hover:bg-purple-50/50 transition-colors cursor-pointer"
+      onClick={handleRowClick}
+    >
+      <td className="p-4">
+        <div className="font-medium text-gray-800 truncate max-w-[200px]">{entry.title}</div>
+        <div className="text-sm text-gray-500 md:hidden truncate max-w-[200px]">
+          {entry.description}
+        </div>
+      </td>
+      <td className="p-4 hidden md:table-cell">
+        <div className="max-w-xs truncate text-sm text-gray-600">
+          {entry.description}
+        </div>
+      </td>
+      <td className="p-4">
+        <div className="font-semibold text-primary">
+          {formatCurrency(entry.amount)}
+        </div>
+      </td>
+      <td className="p-4">
+        <Badge variant={variant}>{capitalizeFirst(entry.status)}</Badge>
+      </td>
+      {isManager && (
+        <td className="p-4 hidden lg:table-cell">
+          <div className="text-sm">{entry.createdBy.email}</div>
+        </td>
+      )}
+      <td className="p-4 hidden sm:table-cell">
+        <div className="text-sm text-muted-foreground">
+          {formatDate(entry.createdAt)}
+        </div>
+      </td>
+      <td className="p-4">
+        <div className="flex justify-end gap-2">
+          {isManager && entry.status === "pending" ? (
+            <>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                onClick={handleApprove}
+              >
+                <CheckCircle className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                onClick={handleReject}
+              >
+                <XCircle className="h-4 w-4" />
+              </Button>
+            </>
+          ) : !isManager ? (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              onClick={handleDelete}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          ) : null}
+        </div>
+      </td>
+    </tr>
+  );
+});
+
+EntryRow.displayName = "EntryRow";
+
+function EntryTableComponent({ entries, onDelete, onApprove, onReject, onRowClick }: EntryTableProps) {
   const { isManager } = useAuth();
 
   if (entries.length === 0) {
@@ -42,91 +152,22 @@ export function EntryTable({ entries, onDelete, onApprove, onReject, onRowClick 
             </tr>
           </thead>
           <tbody className="divide-y">
-            {entries.map((entry) => {
-              const variant = getStatusBadgeVariant(entry.status);
-              return (
-                <tr 
-                  key={entry._id} 
-                  className="hover:bg-purple-50/50 transition-colors cursor-pointer"
-                  onClick={() => onRowClick?.(entry)}
-                >
-                  <td className="p-4">
-                    <div className="font-medium text-gray-800 truncate max-w-[200px]">{entry.title}</div>
-                    <div className="text-sm text-gray-500 md:hidden truncate max-w-[200px]">
-                      {entry.description}
-                    </div>
-                  </td>
-                  <td className="p-4 hidden md:table-cell">
-                    <div className="max-w-xs truncate text-sm text-gray-600">
-                      {entry.description}
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <div className="font-semibold text-primary">
-                      {formatCurrency(entry.amount)}
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <Badge variant={variant}>{capitalizeFirst(entry.status)}</Badge>
-                  </td>
-                  {isManager && (
-                    <td className="p-4 hidden lg:table-cell">
-                      <div className="text-sm">{entry.createdBy.email}</div>
-                    </td>
-                  )}
-                  <td className="p-4 hidden sm:table-cell">
-                    <div className="text-sm text-muted-foreground">
-                      {formatDate(entry.createdAt)}
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <div className="flex justify-end gap-2">
-                      {isManager && entry.status === "pending" ? (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onApprove?.(entry._id);
-                            }}
-                          >
-                            <CheckCircle className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onReject?.(entry._id);
-                            }}
-                          >
-                            <XCircle className="h-4 w-4" />
-                          </Button>
-                        </>
-                      ) : !isManager ? (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDelete?.(entry._id);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      ) : null}
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
+            {entries.map((entry) => (
+              <EntryRow
+                key={entry._id}
+                entry={entry}
+                isManager={isManager}
+                onDelete={onDelete}
+                onApprove={onApprove}
+                onReject={onReject}
+                onRowClick={onRowClick}
+              />
+            ))}
           </tbody>
         </table>
       </div>
     </div>
   );
 }
+
+export const EntryTable = memo(EntryTableComponent);

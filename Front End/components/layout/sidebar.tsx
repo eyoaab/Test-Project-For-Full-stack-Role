@@ -1,5 +1,6 @@
 "use client";
 
+import { memo, useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -13,7 +14,7 @@ interface SidebarProps {
   onClose: () => void;
 }
 
-export function Sidebar({ isOpen, onClose }: SidebarProps) {
+function SidebarComponent({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const { isManager, user } = useAuth();
 
@@ -53,7 +54,11 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     },
   ];
 
-  const navItems = isManager ? managerNavItems : userNavItems;
+  const navItems = useMemo(() => 
+    isManager ? managerNavItems : userNavItems,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isManager]
+  );
 
   return (
     <>
@@ -161,3 +166,5 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     </>
   );
 }
+
+export const Sidebar = memo(SidebarComponent);

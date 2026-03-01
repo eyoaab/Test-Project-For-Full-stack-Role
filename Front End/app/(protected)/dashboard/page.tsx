@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useEntries } from "@/hooks/useEntries";
@@ -13,6 +13,14 @@ export default function DashboardPage() {
   const router = useRouter();
   const { isManager, user } = useAuth();
   const { stats, fetchEntries } = useEntries();
+
+  const navigateToEntries = useCallback(() => {
+    router.push('/dashboard/entries');
+  }, [router]);
+
+  const navigateToCreateManager = useCallback(() => {
+    router.push('/dashboard/create-manager');
+  }, [router]);
 
   useEffect(() => {
     fetchEntries();
@@ -35,7 +43,7 @@ export default function DashboardPage() {
             </p>
           </div>
           <Button 
-            onClick={() => router.push('/dashboard/entries')}
+            onClick={navigateToEntries}
             className="bg-white text-purple-700 hover:bg-purple-50 font-semibold px-6 h-12 shadow-lg"
           >
             View All Entries
@@ -88,7 +96,7 @@ export default function DashboardPage() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <Card 
             className="shadow-smooth border-0 hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 cursor-pointer" 
-            onClick={() => router.push('/dashboard/entries')}
+            onClick={navigateToEntries}
           >
             <CardHeader>
               <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center mb-2">
@@ -112,7 +120,7 @@ export default function DashboardPage() {
           {isManager && (
             <Card 
               className="shadow-smooth border-0 hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 cursor-pointer" 
-              onClick={() => router.push('/dashboard/create-manager')}
+              onClick={navigateToCreateManager}
             >
               <CardHeader>
                 <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center mb-2">
