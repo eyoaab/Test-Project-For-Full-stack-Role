@@ -16,6 +16,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { FileText, CheckCircle, XCircle, Clock, Search, LayoutGrid, List, Loader2 } from "lucide-react";
 import { EntryStatus } from "@/types";
 import { CreateEntryFormData } from "@/lib/validations";
@@ -27,6 +37,8 @@ export default function DashboardPage() {
   const [viewMode, setViewMode] = useState<"grid" | "table">("table");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<EntryStatus | "all">("all");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [entryToDelete, setEntryToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     fetchEntries();
@@ -52,11 +64,19 @@ export default function DashboardPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this entry?")) return;
+  const handleDelete = (id: string) => {
+    setEntryToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!entryToDelete) return;
     try {
-      await deleteEntry(id);
+      await deleteEntry(entryToDelete);
+      setDeleteDialogOpen(false);
+      setEntryToDelete(null);
     } catch (error) {
+      // Error is already handled in deleteEntry
     }
   };
 
@@ -183,6 +203,26 @@ export default function DashboardPage() {
           )}
         </div>
       )}
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Entry</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this entry? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
